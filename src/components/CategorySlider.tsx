@@ -30,7 +30,7 @@ const categories = [
 ];
 
 const CategorySlider = () => {
-  const scrollRef = useRef(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
