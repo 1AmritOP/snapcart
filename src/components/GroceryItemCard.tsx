@@ -1,5 +1,4 @@
 "use client";
-import { IGrocery } from "@/models/grocery.model";
 import React from "react";
 import Image from "next/image";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
@@ -7,8 +6,19 @@ import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { addToCart, decreaseQuantity, increaseQuantity } from "@/redux/cartSlice";
+import mongoose from "mongoose";
 
-const GroceryItemCard = ({ item }: { item: IGrocery }) => {
+export interface InternalIGrocery {
+  _id: mongoose.Types.ObjectId;
+  name: string;
+  category: string;
+  price: string;
+  unit: string;
+  image: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+const GroceryItemCard = ({ item }: { item: InternalIGrocery }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { cartData } = useSelector((state: RootState) => state.cart);
   const cartItem = cartData?.find((i) => i._id == item._id);
@@ -72,7 +82,7 @@ const GroceryItemCard = ({ item }: { item: IGrocery }) => {
             {cartItem.quantity}
           </p>
           <button
-            onClick={()=>dispatch(decreaseQuantity(item._id))}
+            onClick={()=>dispatch(decreaseQuantity(item._id!))}
             type="button"
             className=" w-7 h-7 rounded-full flex items-center justify-center bg-green-100 hover:bg-green-200 transition-all cursor-pointer"
           >
@@ -81,7 +91,10 @@ const GroceryItemCard = ({ item }: { item: IGrocery }) => {
         </motion.div>
       ) : (
         <motion.button
-          onClick={() => dispatch(addToCart({ ...item, quantity: 1 }))}
+          onClick={() =>{ 
+            dispatch(addToCart({ ...item, quantity: 1 }))
+          }
+        }
           whileTap={{ scale: 0.96 }}
           className="w-full cursor-pointer bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-2.5 rounded-full flex items-center justify-center gap-2 transition-colors duration-200"
         >
