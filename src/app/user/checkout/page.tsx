@@ -18,19 +18,16 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import "leaflet/dist/leaflet.css";
-import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
-import L, { LatLngExpression } from "leaflet";
-import axios from "axios";
-import { OpenStreetMapProvider } from "leaflet-geosearch";
 
-const markerIcon = new L.Icon({
-  iconUrl: "https://unpkg.com/leaflet@1.8.0/dist/images/marker-icon.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
+
+import axios from "axios";
+import dynamic from "next/dynamic";
+// import { Marker, useMap } from "react-leaflet";
+// import L,{ LatLngExpression } from "leaflet";
+
+const CheckOutMap = dynamic(() => import("@/components/CheckoutMap"), { ssr: false });
+
+
 const Checkout = () => {
   const router = useRouter();
   const { userData } = useSelector((state: RootState) => state.user);
@@ -53,6 +50,7 @@ const Checkout = () => {
 
   const handleSearchQueary = async () => {
     setSearchLoading(true);
+    const {OpenStreetMapProvider}=await import("leaflet-geosearch");
     const provider = new OpenStreetMapProvider();
     const result = await provider.search({ query: searchQuery });
     if (result) {
@@ -191,26 +189,7 @@ const Checkout = () => {
     fetchAdress();
   }, [position]);
 
-  const DragableMarker: React.FC = () => {
-    const map = useMap();
-    useEffect(() => {
-      map.setView(position as LatLngExpression, 15, { animate: true });
-    }, [map, position]);
 
-    return (
-      <Marker
-        position={position as LatLngExpression}
-        icon={markerIcon}
-        draggable={true}
-        eventHandlers={{
-          dragend: (e) => {
-            const { lat, lng } = e.target.getLatLng();
-            setPosition([lat, lng]);
-          },
-        }}
-      />
-    );
-  };
 
   return (
     <div className=" w-[92%] md:w-[80%] mx-auto py-10 relative">
@@ -385,18 +364,7 @@ const Checkout = () => {
             <div className=" relative  mt-6 h-82.5 rounded-xl overflow-hidden  border border-gray-700 shadow-inner ">
               {position && (
                 <div className="w-full h-full">
-                  <MapContainer
-                    center={position}
-                    zoom={13}
-                    scrollWheelZoom={true}
-                    className="w-full h-full"
-                  >
-                    <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    <DragableMarker />
-                  </MapContainer>
+                  <CheckOutMap position={position} setPosition={setPosition} />
                 </div>
               )}
               <motion.button
